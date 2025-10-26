@@ -1,40 +1,48 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { UpdateUser, User } from 'src/types/user.type';
+import { ConflictException, Injectable, NotFoundException } from "@nestjs/common";
+import { UpdateUserDto } from "./dto/update-user.dto";
+import { CreateUserDto } from "./dto/create-user.dto";
+import { InjectModel } from "@nestjs/mongoose";
+import { User } from "./schema/user.schema";
+import { Model } from "mongoose";
 
 @Injectable()
 export class UserService {
-  users: User[] = [];
-  create(body: User) {
-    this.users.push(body);
-    return { message: 'User created successfully', user: body };
+  constructor(@InjectModel(User.name) private userModel: Model<User>) {}
+
+  users: CreateUserDto[] = [];
+  async create(body: CreateUserDto) {
+    const exist = await this.userModel.findOne({ email: body.email });
+    if (exist) throw new ConflictException("this email already exists");
+    const user = await this.userModel.create(body);
+    return { message: "User created successfully", user };
   }
 
-  createMany(users: User[]) {
-    this.users.push(...users);
-    return { message: 'Many users added', users };
+  // createMany(users: CreateUserDto[]) {
+  //   this.users.push(...users);
+  //   return { message: "Many users added", users };
+  // }
+
+  async getAllUser() {
+    return await this.userModel.find();
   }
 
-  getAllUser(): User[] {
-    return this.users;
-  }
-
-  getUser(id: number) {
-    const user = this.users.find((u) => u.id == id);
-    if (!user) throw new NotFoundException('User Not Found');
+  async getUser(id: string) {
+    const user = await this.userModel.findById(id);
+    if (!user) throw new NotFoundException("user not found");
     return user;
   }
 
-  update(id: number, updateUser: UpdateUser) {
-    const index = this.users.findIndex((u) => u.id == id);
-    this.users[index] = { ...this.users[index], ...updateUser };
+  async update(id: string, updateUser: UpdateUserDto) {
+    const newUser = await this.userModel.findByIdAndUpdate(id, updateUser, {
+      new: true,
+    });
     return {
-      message: 'User Updated Succeessfully',
-      updatedUser: this.users[index],
+      message: "User Updated Succeessfully",
+      updatedUser: newUser,
     };
   }
 
-  deleteUser(id: number) {
-    this.users = this.users.filter((u) => u.id != id);
-    return { message: 'User Deleted' };
+  async deleteUser(id: string) {
+    return await this.userModel.findByIdAndDelete(id);
   }
 }

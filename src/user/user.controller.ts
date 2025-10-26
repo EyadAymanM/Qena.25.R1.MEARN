@@ -6,44 +6,49 @@ import {
   HttpCode,
   HttpStatus,
   Param,
+  // ParseIntPipe,
   Patch,
   Post,
-} from '@nestjs/common';
-import { UserService } from './user.service';
-import { UpdateUser, User } from 'src/types/user.type';
+  UsePipes,
+  ValidationPipe,
+} from "@nestjs/common";
+import { UserService } from "./user.service";
+import { CreateUserDto } from "./dto/create-user.dto";
+import { UpdateUserDto } from "./dto/update-user.dto";
+import { ParseObjectIdPipe } from "src/parse-object-id/parse-object-id.pipe";
 
-@Controller('user')
+@Controller("user")
+// @UsePipes(new ValidationPipe())
 export class UserController {
   constructor(private userService: UserService) {}
-
+  
   @Post()
-  create(@Body() body: User) {
+  create(@Body() body: CreateUserDto) {
     return this.userService.create(body);
   }
 
-  @Post('many')
-  createMany(@Body() body: User[]) {
-    return this.userService.createMany(body);
-  }
+  // @Post("many")
+  // createMany(@Body() body: CreateUserDto[]) {
+  //   return this.userService.createMany(body);
+  // }
 
-  @Get('')
-  getAllUser(): User[] {
+  @Get("")
+  getAllUser() {
     return this.userService.getAllUser();
   }
 
-  @Get(':id')
-  getUser(@Param('id') id) {
-    return this.userService.getUser(+id);
+  @Get(":id")
+  getUser(@Param("id", ParseObjectIdPipe) id) {
+    return this.userService.getUser(id);
+  }
+  @Patch(":id")
+  update(@Param("id") id, @Body() body: UpdateUserDto) {
+    return this.userService.update(id, body);
   }
 
-  @Patch(':id')
-  update(@Param('id') id, @Body() body: UpdateUser) {
-    return this.userService.update(+id, body);
-  }
-
-  @Delete(':id')
+  @Delete(":id")
   @HttpCode(HttpStatus.NO_CONTENT)
-  deleteUser(@Param('id') id) {
-    return this.userService.deleteUser(+id);
+  deleteUser(@Param("id") id) {
+    return this.userService.deleteUser(id);
   }
 }
