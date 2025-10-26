@@ -78,3 +78,79 @@ src/
  ├── app.module.ts
  └── main.ts
 ```
+
+## 🗓️ Day 2 – Add Validation & Database (MongoDB)
+
+### 🎯 Goal
+Enhance the app by:
+- Adding **DTOs** for input data.
+- Using **class-validator** and **class-transformer**.
+- Connecting to a **MongoDB** database.
+- Replacing arrays with **real database entities**.
+
+---
+
+### 📋 Requirements
+
+#### 1. Setup Database
+- Use **MongoDB**.
+- Connect via **MongooseModule** in `app.module.ts`.
+  ```ts
+  MongooseModule.forRoot('mongodb://localhost:27017/bookmark-app')
+  ```
+
+#### 2. Create Schemas
+Replace in-memory entities with MongoDB schemas:
+
+**User Schema**
+```ts
+@Schema()
+export class User {
+  @Prop({ required: true })
+  name: string;
+}
+```
+
+**Bookmark Schema**
+```ts
+@Schema()
+export class Bookmark {
+  @Prop({ required: true })
+  title: string;
+
+  @Prop({ required: true })
+  url: string;
+
+  @Prop({ required: true })
+  userId: string;
+}
+```
+
+#### 3. Add DTOs
+Example:
+```ts
+export class CreateUserDto {
+  @IsString()
+  @IsNotEmpty()
+  name: string;
+}
+```
+
+#### 4. Enable Validation Globally
+In `main.ts`:
+```ts
+app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
+```
+
+#### 5. Update Services
+Replace in-memory logic with **Mongoose models**:
+- Use `@InjectModel()` to inject collections.
+- Perform CRUD operations using Mongoose methods (`create`, `find`, `findById`, `deleteOne`, etc.).
+
+---
+
+### 🧠 Bonus
+- Add `updatedAt` and `createdAt` timestamps in schemas.
+- Add user existence check before creating a bookmark.
+
+---
