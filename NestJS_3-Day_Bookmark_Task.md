@@ -154,3 +154,85 @@ Replace in-memory logic with **Mongoose models**:
 - Add user existence check before creating a bookmark.
 
 ---
+
+## 🗓️ Day 3 – Authentication & Authorization (JWT)
+
+### 🎯 Goal
+Implement **login**, **registration**, and **role-based access control** using:
+- JWT Authentication
+- Guards
+- Custom Roles Decorator
+
+---
+
+### 📋 Requirements
+
+#### 1. Auth Module
+Create an `auth` module with:
+- `AuthController`
+- `AuthService`
+
+#### 2. Features
+- **Register** (POST `/auth/register`)
+  - Accept `name`, `email`, and `password`
+  - Hash passwords using `bcrypt`
+- **Login** (POST `/auth/login`)
+  - Validate credentials
+  - Return a signed JWT
+
+#### 3. JWT Integration
+- Use `@nestjs/jwt`
+- Configure in `AuthModule`:
+  ```ts
+  JwtModule.register({
+    secret: 'supersecret',
+    signOptions: { expiresIn: '1d' },
+  })
+  ```
+
+#### 4. Authentication Guard
+
+
+#### 4. Authorization Guard
+- Create a `JwtGuard` extending `AuthGuard('jwt')`
+- Apply it to routes that require authentication:
+  ```ts
+  @UseGuards(AuthenticationGuard,AuthorizationGuard)
+  ```
+
+#### 5. Roles Decorator (Bonus)
+Implement a custom `@Roles()` decorator and `RolesGuard`:
+- Admin can delete any bookmark.
+- Users can only modify their own bookmarks.
+
+---
+
+### 🧠 Bonus (Optional)
+- Add refresh tokens.
+- Hash JWT secret using environment variables.
+- Apply role checks for `UsersController` and `BookmarksController`.
+
+---
+
+## 🧩 Final Project Structure (Suggested)
+
+```
+src/
+ ├── auth/
+ │    ├── auth.controller.ts
+ │    ├── auth.service.ts
+ │    ├── jwt.guard.ts
+ │    └── roles.decorator.ts
+ ├── bookmarks/
+ │    ├── bookmarks.controller.ts
+ │    ├── bookmarks.service.ts
+ │    ├── bookmark.schema.ts
+ │    └── bookmarks.module.ts
+ ├── users/
+ │    ├── users.controller.ts
+ │    ├── users.service.ts
+ │    ├── user.schema.ts
+ │    └── users.module.ts
+ ├── app.module.ts
+ └── main.ts
+```
